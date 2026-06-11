@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  tasks        Task[]
+  activities   TaskActivity[]
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  title       String
+  description String
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  userId      String       @db.Uuid
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments TaskAttachment[]
+  activities  TaskActivity[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model TaskAttachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  filename  String
+  mimeType  String
+  size      Int
+  url       String
+  taskId    String   @db.Uuid
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model TaskActivity {
+  id        String   @id @default(uuid()) @db.Uuid
+  action    String
+  oldValue  String?
+  newValue  String?
+  taskId    String   @db.Uuid
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}

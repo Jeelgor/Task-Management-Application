@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: task-management-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: task_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: task-management-backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/task_management?schema=public
+      - JWT_SECRET=supersecretjwtkey_change_in_production
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
