@@ -59,7 +59,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 
   const orderBy: Prisma.TaskOrderByWithRelationInput = {};
   if (sortBy) {
-    orderBy[sortBy as string] = sortOrder || 'asc';
+    (orderBy as any)[sortBy as string] = sortOrder || 'asc';
   } else {
     orderBy.createdAt = 'desc';
   }
@@ -101,7 +101,7 @@ export const getAllAdminTasks = async (req: AuthRequest, res: Response) => {
 
   const orderBy: Prisma.TaskOrderByWithRelationInput = {};
   if (sortBy) {
-    orderBy[sortBy as string] = sortOrder || 'asc';
+    (orderBy as any)[sortBy as string] = sortOrder || 'asc';
   } else {
     orderBy.createdAt = 'desc';
   }
@@ -131,7 +131,7 @@ export const getAllAdminTasks = async (req: AuthRequest, res: Response) => {
 
 export const getTaskById = async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   try {
     const task = await prisma.task.findUnique({ 
@@ -151,7 +151,7 @@ export const getTaskById = async (req: AuthRequest, res: Response) => {
 
 export const updateTask = async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { title, description, status, priority, dueDate } = req.body;
 
   try {
@@ -183,7 +183,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   try {
     const task = await prisma.task.findUnique({ where: { id } });
@@ -204,7 +204,7 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
 
 export const uploadAttachment = async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
-  const { id } = req.params;
+  const id = req.params.id as string;
   const file = req.file;
 
   if (!file) {
