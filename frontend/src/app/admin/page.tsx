@@ -18,7 +18,7 @@ type Task = {
 };
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
@@ -48,14 +48,15 @@ export default function AdminDashboard() {
   }, [page, search]);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.push('/login');
       return;
     }
-    if (user.role !== 'ADMIN') {
+    if (!authLoading && user && user.role !== 'ADMIN') {
       router.push('/dashboard');
       return;
     }
+    if (authLoading || !user || user.role !== 'ADMIN') return;
 
     const delayDebounceFn = setTimeout(() => {
       fetchTasks();
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
     return () => clearTimeout(delayDebounceFn);
   }, [user, fetchTasks, router]);
 
-  if (!user || user.role !== 'ADMIN') return null;
+  if (authLoading || !user || user.role !== 'ADMIN') return null;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-8">

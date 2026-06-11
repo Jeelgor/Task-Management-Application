@@ -34,7 +34,7 @@ type Task = {
 };
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
@@ -84,10 +84,12 @@ export default function Dashboard() {
   }, [page, sortBy, sortOrder, search, statusFilter]);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.push('/login');
       return;
     }
+
+    if (authLoading || !user) return;
 
     const delayDebounceFn = setTimeout(() => {
       fetchTasks();
@@ -229,7 +231,7 @@ export default function Dashboard() {
     }
   };
 
-  if (!user) return null;
+  if (authLoading || !user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-8">
