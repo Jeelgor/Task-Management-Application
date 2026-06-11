@@ -28,7 +28,7 @@ app.get('/health', (req, res) => {
 
 export default app;
 
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
