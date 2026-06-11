@@ -13,8 +13,11 @@ RUN npx prisma generate
 # Copy the rest of the backend source code
 COPY . .
 
+# Build TypeScript code
+RUN npm run build
+
 # Expose the port
 EXPOSE 3001
 
-# Run the development server
-CMD ["npm", "run", "dev"]
+# Run the production server
+CMD ["npm", "start"]
