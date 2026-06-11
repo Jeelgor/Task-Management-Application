@@ -27,8 +27,12 @@ export default function Register() {
       });
       
       login(data.user, data.token);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }

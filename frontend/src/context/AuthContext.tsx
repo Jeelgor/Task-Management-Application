@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
     if (storedUser && storedToken) {
+      // eslint-disable-next-line
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
     }

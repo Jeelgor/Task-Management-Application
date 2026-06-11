@@ -27,8 +27,12 @@ export default function Login() {
       });
       
       login(data.user, data.token);
-    } catch (err: any) {
-      setError(err.message || 'Failed to login');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }
@@ -81,10 +85,12 @@ export default function Login() {
         </form>
         
         <div className="text-center text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
-            Sign up
-          </Link>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>

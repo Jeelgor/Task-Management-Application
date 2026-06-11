@@ -107,7 +107,7 @@ export default function Dashboard() {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const sse = new EventSource(`${baseUrl}/tasks/stream?token=${token}`, { withCredentials: true });
 
-    sse.onmessage = (event) => {
+    sse.onmessage = () => {
       // In a robust implementation, we'd inspect event.type. 
       // We'll just refetch for simplicity and guaranteed consistency,
       // or we can optimistically merge if we parse the data.
@@ -180,7 +180,7 @@ export default function Dashboard() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     // Optimistic Update
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus as any } : t));
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus as 'TODO' | 'IN_PROGRESS' | 'DONE' } : t));
     
     try {
       await apiFetch(`/tasks/${id}`, {
