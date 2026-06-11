@@ -52,6 +52,7 @@ export default function Dashboard() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'attachments' | 'activity'>('details');
   const [uploading, setUploading] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<File[]>([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -136,13 +137,28 @@ export default function Dashboard() {
           body: JSON.stringify(body),
         });
       } else {
-        await apiFetch('/tasks', {
+        const newTask = await apiFetch('/tasks', {
           method: 'POST',
           body: JSON.stringify(body),
         });
+
+        if (pendingAttachments.length > 0) {
+          const token = localStorage.getItem('token');
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+          for (const file of pendingAttachments) {
+            const fileData = new FormData();
+            fileData.append('file', file);
+            await fetch(`${baseUrl}/tasks/${newTask.id}/attachments`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` },
+              body: fileData,
+            });
+          }
+        }
       }
       setIsModalOpen(false);
       setEditingTask(null);
+      setPendingAttachments([]);
       setFormData({ title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '' });
       fetchTasks();
     } catch (error) {
@@ -312,6 +328,7 @@ export default function Dashboard() {
             onClick={() => {
               setEditingTask(null);
               setFormData({ title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '' });
+              setPendingAttachments([]);
               setActiveTab('details');
               setIsModalOpen(true);
             }}
@@ -442,6 +459,22 @@ export default function Dashboard() {
                     <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-1">Due Date</label>
                     <input type="date" value={formData.dueDate} onChange={(e) => setFormData({...formData, dueDate: e.target.value})} className="w-full px-3 py-2 border border-gray-300 text-gray-900 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg" />
                   </div>
+                  {!editingTask && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-1">Attachments (Optional)</label>
+                      <input 
+                        type="file" 
+                        multiple 
+                        onChange={(e) => {
+                          if (e.target.files) setPendingAttachments(Array.from(e.target.files));
+                        }} 
+                        className="w-full px-3 py-2 border border-gray-300 text-gray-900 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-800 dark:file:text-blue-400" 
+                      />
+                      {pendingAttachments.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">{pendingAttachments.length} file(s) selected</p>
+                      )}
+                    </div>
+                  )}
                 </form>
               )}
 
